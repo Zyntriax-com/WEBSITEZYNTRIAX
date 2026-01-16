@@ -6,6 +6,8 @@
 <title>ZYNTRIAX Marketplace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -15,7 +17,6 @@
 --primary:#6366f1;
 --bg:#020205;
 }
-
 body{
 font-family:'Plus Jakarta Sans',sans-serif;
 background:#020205;
@@ -23,8 +24,6 @@ color:white;
 overflow-x:hidden;
 cursor:none;
 }
-
-/* Cursor */
 #cursor{
 width:14px;height:14px;
 background:var(--accent);
@@ -34,8 +33,6 @@ z-index:9999;
 pointer-events:none;
 mix-blend-mode:difference;
 }
-
-/* Video */
 #bg-video{
 position:fixed;
 inset:0;
@@ -43,23 +40,19 @@ width:100%;
 height:100%;
 object-fit:cover;
 z-index:-2;
-filter:brightness(.55) contrast(1.05);
+filter:brightness(.6) contrast(1.05);
 }
 .video-overlay{
 position:fixed;
 inset:0;
-background:linear-gradient(180deg,rgba(2,2,5,.25),#020205 85%);
+background:linear-gradient(180deg,rgba(2,2,5,.2),#020205 85%);
 z-index:-1;
 }
-
-/* Glass */
 .glass{
-background:rgba(255,255,255,.06);
-border:1px solid rgba(255,255,255,.1);
+background:rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.12);
 backdrop-filter:blur(35px);
 }
-
-/* Button */
 .btn{
 background:linear-gradient(90deg,var(--primary),var(--accent));
 color:black;
@@ -68,7 +61,6 @@ border-radius:999px;
 transition:.3s;
 }
 .btn:hover{transform:translateY(-3px)}
-
 .tab{display:none}
 .tab.active{display:block}
 </style>
@@ -83,10 +75,15 @@ transition:.3s;
 </video>
 <div class="video-overlay"></div>
 
-<!-- NAV -->
+<!-- NAVBAR -->
 <nav class="fixed top-0 w-full z-50 glass px-10 py-6 flex justify-between items-center">
-<div class="text-2xl font-bold cursor-pointer" onclick="openTab('home')">
-<span class="text-cyan-400">Z</span>YNTRIAX
+
+<!-- LOGO + BRAND -->
+<div class="flex items-center gap-3 cursor-pointer" onclick="openTab('home')">
+  <img src="logo.png" alt="ZYNTRIAX Logo" class="w-9 h-9 object-contain">
+  <div class="text-2xl font-bold">
+    <span class="text-cyan-400">Z</span>YNTRIAX
+  </div>
 </div>
 
 <div class="hidden md:flex gap-8 text-xs uppercase tracking-widest font-bold">
@@ -94,6 +91,7 @@ transition:.3s;
 <button onclick="openTab('store')">Store</button>
 <button onclick="openTab('cart')">Cart</button>
 <button onclick="openTab('orders')">Invoices</button>
+<button onclick="openTab('account')">Account</button>
 <button onclick="openTab('support')">Support</button>
 </div>
 
@@ -102,161 +100,111 @@ transition:.3s;
 <i class="fa fa-cart-shopping"></i>
 <span id="cartCount" class="absolute -top-2 -right-2 bg-cyan-400 text-black text-[10px] px-1.5 rounded-full">0</span>
 </div>
-<button onclick="toggleLogin()" id="loginBtn" class="text-xs border border-cyan-400 px-4 py-2 rounded-full">Login</button>
-<span id="userTag" class="hidden text-xs text-cyan-400"></span>
+
+<button onclick="login()" id="loginBtn" class="text-xs border border-cyan-400 px-4 py-2 rounded-full">Login</button>
+
+<div id="userBox" class="hidden flex items-center gap-3">
+<span id="userTag" class="text-xs text-cyan-400"></span>
+<button onclick="logout()" class="text-red-400 hover:text-white">
+<i class="fa fa-power-off"></i>
+</button>
+</div>
 </div>
 </nav>
 
 <main class="pt-44 px-8 pb-24 space-y-32">
 
-<!-- HOME -->
-<section id="home" class="tab active text-center space-y-20">
-
-<div>
-<h1 class="text-7xl md:text-8xl font-bold mb-6">
-Buy<br><span class="text-cyan-400">Premium Websites</span>
-</h1>
-<p class="text-gray-400 max-w-2xl mx-auto">
-A high-end digital marketplace for production-ready websites, SaaS products, and scalable frontend assets.
+<section id="home" class="tab active text-center">
+<h1 class="text-7xl font-bold mb-6">Premium Website Marketplace</h1>
+<p class="text-gray-400 max-w-xl mx-auto mb-10">
+Secure invoices. User-locked downloads. Professional flow.
 </p>
-</div>
-
-<div class="grid md:grid-cols-3 gap-10">
-<div class="glass p-8 rounded-3xl">
-<h3 class="font-bold text-xl mb-2">Instant Ownership</h3>
-<p class="text-gray-400 text-sm">Transfer-ready assets with full source code access.</p>
-</div>
-<div class="glass p-8 rounded-3xl">
-<h3 class="font-bold text-xl mb-2">Verified Vendors</h3>
-<p class="text-gray-400 text-sm">Multi-vendor ecosystem with quality validation.</p>
-</div>
-<div class="glass p-8 rounded-3xl">
-<h3 class="font-bold text-xl mb-2">Invoice & License</h3>
-<p class="text-gray-400 text-sm">Automatic invoice generation & ownership proof.</p>
-</div>
-</div>
-
-<button onclick="openTab('store')" class="btn px-20 py-6 text-xs uppercase">
-Explore Marketplace
+<button onclick="openTab('store')" class="btn px-16 py-5 text-xs uppercase">
+Explore Store
 </button>
-
 </section>
 
-<!-- STORE -->
-<section id="store" class="tab space-y-16">
-
+<section id="store" class="tab space-y-10">
 <h2 class="text-5xl font-bold">Marketplace</h2>
-
 <div class="grid md:grid-cols-2 gap-10">
 
-<div class="glass p-8 rounded-3xl space-y-6">
+<div class="glass p-8 rounded-3xl">
 <h3 class="text-2xl font-bold">SaaS Landing Pro</h3>
-<p class="text-gray-400">Vendor: <b>NeonLabs</b></p>
-<ul class="text-sm text-gray-400 list-disc ml-5 space-y-1">
-<li>Tailwind + GSAP animations</li>
-<li>SEO optimized layout</li>
-<li>Production ready</li>
-</ul>
-<div class="flex justify-between items-center">
+<p class="text-gray-400">Vendor: NeonLabs</p>
 <span class="text-cyan-400 text-2xl font-bold">$2999</span>
-<button onclick="addToCart('SaaS Landing Pro',2999,'NeonLabs')" class="btn px-8 py-3 text-xs">Add to Cart</button>
-</div>
+<button onclick="addToCart('SaaS Landing Pro',2999,'NeonLabs')" class="btn px-8 py-3 text-xs mt-4">Add</button>
 </div>
 
-<div class="glass p-8 rounded-3xl space-y-6">
+<div class="glass p-8 rounded-3xl">
 <h3 class="text-2xl font-bold">Agency Website</h3>
-<p class="text-gray-400">Vendor: <b>AuraStudio</b></p>
-<ul class="text-sm text-gray-400 list-disc ml-5 space-y-1">
-<li>Creative portfolio design</li>
-<li>CMS ready structure</li>
-<li>Client-ready delivery</li>
-</ul>
-<div class="flex justify-between items-center">
+<p class="text-gray-400">Vendor: AuraStudio</p>
 <span class="text-cyan-400 text-2xl font-bold">$1850</span>
-<button onclick="addToCart('Agency Website',1850,'AuraStudio')" class="btn px-8 py-3 text-xs">Add to Cart</button>
-</div>
-</div>
-
+<button onclick="addToCart('Agency Website',1850,'AuraStudio')" class="btn px-8 py-3 text-xs mt-4">Add</button>
 </div>
 
+</div>
 </section>
 
-<!-- CART -->
 <section id="cart" class="tab space-y-10">
-
-<h2 class="text-5xl font-bold">Your Cart</h2>
-<div id="cartItems" class="space-y-4"></div>
-
+<h2 class="text-5xl font-bold">Cart</h2>
+<div id="cartItems"></div>
 <div class="glass p-8 rounded-3xl flex justify-between items-center">
-<div>
-<p class="text-gray-400 text-sm">Secure license generation</p>
-<p id="total" class="text-cyan-400 text-2xl font-bold">$0</p>
+<span id="total" class="text-cyan-400 text-2xl font-bold">$0</span>
+<button onclick="checkout()" class="btn px-12 py-4 text-xs uppercase">
+Generate Invoice
+</button>
 </div>
-<button onclick="checkout()" class="btn px-12 py-4 text-xs uppercase">Generate Invoice</button>
-</div>
-
 </section>
 
-<!-- ORDERS -->
 <section id="orders" class="tab space-y-10">
-
-<h2 class="text-5xl font-bold">Invoices</h2>
-<p class="text-gray-400">All your purchases with vendor & license details.</p>
-<div id="ordersList" class="space-y-6"></div>
-
+<h2 class="text-5xl font-bold">Your Invoices</h2>
+<div id="ordersList"></div>
 </section>
 
-<!-- SUPPORT -->
-<section id="support" class="tab space-y-12 text-center">
+<section id="account" class="tab space-y-10">
+<h2 class="text-5xl font-bold">My Account</h2>
+<div id="accountInfo" class="glass p-10 rounded-3xl"></div>
+</section>
 
-<h2 class="text-5xl font-bold">Support Center</h2>
-<p class="text-gray-400 max-w-xl mx-auto">
-Need help with purchase, license transfer, or vendor coordination?  
-Our acquisition team is ready.
-</p>
-
-<div class="grid md:grid-cols-3 gap-8">
-<div class="glass p-6 rounded-2xl">Average Response: <b>2–4 Hours</b></div>
-<div class="glass p-6 rounded-2xl">License Support: <b>Included</b></div>
-<div class="glass p-6 rounded-2xl">Vendor Mediation: <b>Available</b></div>
-</div>
-
-<a href="https://zyntriax.netlify.app/" target="_blank" class="btn px-20 py-5 text-xs uppercase">
+<section id="support" class="tab text-center space-y-8">
+<h2 class="text-5xl font-bold">Support</h2>
+<a href="https://zyntriax.netlify.app/" target="_blank" class="btn px-16 py-5 text-xs uppercase">
 Contact Us
 </a>
-
 </section>
 
 </main>
 
 <script>
-/* Cursor */
 const cursor=document.getElementById('cursor');
 document.addEventListener('mousemove',e=>{
 cursor.style.left=e.clientX+'px';
 cursor.style.top=e.clientY+'px';
 });
 
-/* Tabs */
 function openTab(id){
 document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
 document.getElementById(id).classList.add('active');
-window.scrollTo(0,0);
 }
 
-/* Login */
-function toggleLogin(){loginModal.classList.toggle('hidden')}
-function login(e){
-e.preventDefault();
-const user=email.value.split('@')[0];
-localStorage.setItem('user',user);
+function login(){
+const email=prompt("Enter your email");
+if(!email) return;
+localStorage.setItem('user',email);
 loginBtn.classList.add('hidden');
-userTag.innerText="ID: "+user;
-userTag.classList.remove('hidden');
-toggleLogin();
+userBox.classList.remove('hidden');
+userTag.innerText="ID: "+email.split('@')[0];
+renderInvoices();
+renderAccount();
 }
 
-/* Cart + Invoice */
+function logout(){
+localStorage.removeItem('user');
+userBox.classList.add('hidden');
+loginBtn.classList.remove('hidden');
+openTab('home');
+}
+
 let cart=[];
 let invoices=JSON.parse(localStorage.getItem('invoices'))||[];
 
@@ -272,8 +220,8 @@ let sum=0;
 cart.forEach(i=>{
 sum+=i.price;
 cartItems.innerHTML+=`
-<div class="glass p-6 rounded-xl">
-<b>${i.name}</b> — ${i.vendor}
+<div class="glass p-4 rounded-xl mb-2">
+<b>${i.name}</b> (${i.vendor})
 <span class="float-right text-cyan-400">$${i.price}</span>
 </div>`;
 });
@@ -281,38 +229,80 @@ total.innerText="$"+sum;
 }
 
 function checkout(){
-if(!localStorage.getItem('user')) return alert("Login required");
+const user=localStorage.getItem('user');
+if(!user) return alert("Login required");
 const invoice={
 id:"INV-"+Date.now(),
-user:localStorage.getItem('user'),
+user:user,
 date:new Date().toLocaleString(),
 items:cart
 };
 invoices.push(invoice);
 localStorage.setItem('invoices',JSON.stringify(invoices));
-cart=[];
-cartCount.innerText=0;
-renderCart();
-renderInvoices();
+cart=[]; cartCount.innerText=0;
+renderCart(); renderInvoices(); renderAccount();
 openTab('orders');
 }
 
 function renderInvoices(){
 ordersList.innerHTML='';
-invoices.forEach(inv=>{
+const user=localStorage.getItem('user');
+if(!user){
+ordersList.innerHTML='<p class="text-gray-500">Login to view invoices</p>';
+return;
+}
+invoices.filter(i=>i.user===user).forEach(inv=>{
 ordersList.innerHTML+=`
-<div class="glass p-6 rounded-xl">
+<div class="glass p-6 rounded-xl mb-4">
 <b>${inv.id}</b><br>
-User: ${inv.user}<br>
 Date: ${inv.date}<br>
-Assets: ${inv.items.map(i=>`${i.name} (${i.vendor})`).join(', ')}
+Items: ${inv.items.map(i=>i.name).join(', ')}<br>
+<button onclick="downloadPDF('${inv.id}')" class="btn px-6 py-2 text-xs mt-3">
+Download PDF
+</button>
 </div>`;
 });
 }
+
+function renderAccount(){
+const user=localStorage.getItem('user');
+if(!user) return;
+const userInvoices=invoices.filter(i=>i.user===user);
+const spent=userInvoices.reduce((s,i)=>s+i.items.reduce((a,b)=>a+b.price,0),0);
+accountInfo.innerHTML=`
+<p><b>Email:</b> ${user}</p>
+<p><b>Total Invoices:</b> ${userInvoices.length}</p>
+<p><b>Total Spend:</b> $${spent}</p>
+<p class="text-gray-400 text-sm mt-4">
+Invoices are securely linked to your account.
+</p>`;
+}
+
+function downloadPDF(id){
+const user=localStorage.getItem('user');
+const inv=invoices.find(i=>i.id===id && i.user===user);
+if(!inv) return alert("Unauthorized");
+
+const { jsPDF }=window.jspdf;
+const doc=new jsPDF();
+doc.setFontSize(18);
+doc.text("ZYNTRIAX OFFICIAL INVOICE",20,20);
+doc.setFontSize(12);
+doc.text(`Invoice: ${inv.id}`,20,35);
+doc.text(`Client: ${inv.user}`,20,45);
+doc.text(`Date: ${inv.date}`,20,55);
+
+let y=70;
+inv.items.forEach(i=>{
+doc.text(`${i.name} (${i.vendor}) - $${i.price}`,20,y);
+y+=10;
+});
+doc.text("Digitally generated invoice.",20,y+10);
+doc.save(inv.id+".pdf");
+}
+
 renderInvoices();
 </script>
-
-<script src="https://cdn.jotfor.ms/agent/embedjs/019b7ad783c8752b8f5e2a23fd53242dccab/embed.js"></script>
 
 </body>
 </html>
