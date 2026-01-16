@@ -1,239 +1,318 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZYNTRIAX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZYNTRIAX Marketplace</title>
 
-    <style>
-        :root { --primary: #6366f1; --accent: #00f2ff; --bg-dark: #020205; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #ffffff; overflow-x: hidden; cursor: none; }
-        
-        /* Interactive Cursor */
-        #cursor { position: fixed; width: 20px; height: 20px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 10000; mix-blend-mode: difference; transition: transform 0.1s ease; }
-        
-        /* Background & Video */
-        #bg-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(0.15) contrast(1.1); }
-        .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 0%, var(--bg-dark) 95%); z-index: -1; }
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        /* Navigation Transitions */
-        .tab-content { display: none; animation: slideUp 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
-        .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+<style>
+:root{
+--accent:#00f2ff;
+--primary:#6366f1;
+--bg:#020205;
+}
 
-        /* UI Components */
-        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); transition: 0.4s; }
-        .glass-card:hover { border-color: var(--accent); background: rgba(255, 255, 255, 0.05); }
-        
-        .btn-premium { background: linear-gradient(90deg, var(--primary), var(--accent)); color: #000; font-weight: 800; border-radius: 50px; transition: 0.4s; box-shadow: 0 5px 15px rgba(0, 242, 255, 0.2); }
-        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 242, 255, 0.4); }
+body{
+font-family:'Plus Jakarta Sans',sans-serif;
+background:#020205;
+color:white;
+overflow-x:hidden;
+cursor:none;
+}
 
-        .cart-badge { position: absolute; top: -8px; right: -12px; background: var(--accent); color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 50%; }
+/* Cursor */
+#cursor{
+width:14px;height:14px;
+background:var(--accent);
+border-radius:50%;
+position:fixed;
+z-index:9999;
+pointer-events:none;
+mix-blend-mode:difference;
+}
 
-        /* Auth UI */
-        #loginModal { display: none; position: fixed; inset: 0; z-index: 10005; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); align-items: center; justify-content: center; }
-        #loginModal.show { display: flex; }
-    </style>
+/* Video */
+#bg-video{
+position:fixed;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-2;
+filter:brightness(.55) contrast(1.05);
+}
+.video-overlay{
+position:fixed;
+inset:0;
+background:linear-gradient(180deg,rgba(2,2,5,.25),#020205 85%);
+z-index:-1;
+}
+
+/* Glass */
+.glass{
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.1);
+backdrop-filter:blur(35px);
+}
+
+/* Button */
+.btn{
+background:linear-gradient(90deg,var(--primary),var(--accent));
+color:black;
+font-weight:800;
+border-radius:999px;
+transition:.3s;
+}
+.btn:hover{transform:translateY(-3px)}
+
+.tab{display:none}
+.tab.active{display:block}
+</style>
 </head>
-<body class="overflow-hidden">
 
-    <div id="cursor"></div>
+<body>
 
-    <div id="preloader" class="fixed inset-0 z-[10010] bg-black flex flex-col items-center justify-center transition-all duration-1000">
-        <div class="text-3xl font-bold tracking-[1em] animate-pulse">ZYNTRIAX</div>
-        <div class="w-48 h-[1px] bg-white/10 mt-6 relative overflow-hidden"><div id="progress" class="absolute inset-0 bg-accent w-0"></div></div>
-    </div>
+<div id="cursor"></div>
 
-    <div id="loginModal">
-        <div class="glass-card p-10 rounded-[2.5rem] w-full max-w-sm border-white/10">
-            <h2 class="text-2xl font-bold mb-2 tracking-tighter">CLIENT PORTAL</h2>
-            <form onsubmit="handleAuth(event)" class="space-y-4">
-                <input type="email" id="authEmail" placeholder="Access Email" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-accent" required>
-                <input type="password" placeholder="Security Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-accent" required>
-                <button type="submit" id="authBtn" class="w-full btn-premium py-4 uppercase text-xs tracking-widest">Establish Link</button>
-                <button type="button" onclick="toggleAuth()" class="w-full text-[10px] text-gray-600 hover:text-white mt-2 uppercase tracking-widest">Abort Protocol</button>
-            </form>
-        </div>
-    </div>
+<video autoplay muted loop playsinline id="bg-video">
+<source src="https://www.pexels.com/download/video/3248994/" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
 
-    <nav class="fixed w-full z-[100] py-6 px-12 flex justify-between items-center border-b border-white/5 bg-black/40 backdrop-blur-xl">
-        <div class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="switchTab('home')">
-            <span class="text-accent">Z</span>YNTRIAX
-        </div>
-        
-        <div class="hidden lg:flex gap-8 text-[10px] uppercase tracking-[0.3em] font-bold">
-            <button onclick="switchTab('marketplace')" class="hover:text-accent transition">Catalog</button>
-            <button onclick="switchTab('engine')" class="hover:text-accent transition">Engine</button>
-            <button onclick="switchTab('contact')" class="hover:text-accent transition">Acquisition</button>
-            <button onclick="switchTab('support')" class="hover:text-accent transition">Support</button>
-        </div>
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 glass px-10 py-6 flex justify-between items-center">
+<div class="text-2xl font-bold cursor-pointer" onclick="openTab('home')">
+<span class="text-cyan-400">Z</span>YNTRIAX
+</div>
 
-        <div class="flex items-center gap-8">
-            <div class="relative cursor-pointer" onclick="switchTab('checkout')">
-                <i class="fa-solid fa-cart-shopping text-gray-400 hover:text-white transition"></i>
-                <span id="cartCount" class="cart-badge">0</span>
-            </div>
-            <div id="authSection">
-                <button onclick="toggleAuth()" id="loginBtn" class="px-6 py-2 border border-accent/30 text-accent rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition">Login</button>
-                <div id="userProfile" class="hidden items-center gap-4">
-                    <span id="userName" class="text-[10px] font-bold text-accent"></span>
-                    <button onclick="logout()" class="text-red-500 hover:text-white transition"><i class="fa-solid fa-power-off"></i></button>
-                </div>
-            </div>
-        </div>
-    </nav>
+<div class="hidden md:flex gap-8 text-xs uppercase tracking-widest font-bold">
+<button onclick="openTab('home')">Home</button>
+<button onclick="openTab('store')">Store</button>
+<button onclick="openTab('cart')">Cart</button>
+<button onclick="openTab('orders')">Invoices</button>
+<button onclick="openTab('support')">Support</button>
+</div>
 
-    <video autoplay muted loop playsinline id="bg-video">
-        <source src="https://www.pexels.com/download/video/3248994/" type="video/mp4">
-    </video>
-    <div class="video-overlay"></div>
+<div class="flex items-center gap-6">
+<div onclick="openTab('cart')" class="relative cursor-pointer">
+<i class="fa fa-cart-shopping"></i>
+<span id="cartCount" class="absolute -top-2 -right-2 bg-cyan-400 text-black text-[10px] px-1.5 rounded-full">0</span>
+</div>
+<button onclick="toggleLogin()" id="loginBtn" class="text-xs border border-cyan-400 px-4 py-2 rounded-full">Login</button>
+<span id="userTag" class="hidden text-xs text-cyan-400"></span>
+</div>
+</nav>
 
-    <main class="pt-40 pb-20 px-6 md:px-12">
+<main class="pt-44 px-8 pb-24 space-y-32">
 
-        <section id="home" class="tab-content active text-center py-10">
-            <h1 class="text-7xl md:text-[9rem] font-bold tracking-tighter mb-8 leading-none">THE ASSET<br><span class="text-accent">MARKET.</span></h1>
-            <p class="max-w-xl mx-auto text-gray-400 mb-12 uppercase tracking-widest text-[10px]">High-Performance Web Properties Ready for Deployment</p>
-            <div class="flex flex-wrap gap-4 justify-center">
-                <button onclick="switchTab('marketplace')" class="btn-premium px-12 py-5 text-[10px] uppercase tracking-widest">Enter Catalog</button>
-                <button onclick="switchTab('contact')" class="px-12 py-5 border border-white/10 rounded-full hover:bg-white/5 transition text-[10px] font-bold uppercase tracking-widest">Apply Now</button>
-            </div>
-        </section>
+<!-- HOME -->
+<section id="home" class="tab active text-center space-y-20">
 
-        <section id="marketplace" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="glass-card p-5 rounded-[2.5rem] group">
-                    <div class="h-56 bg-gray-900 rounded-3xl mb-6 overflow-hidden relative">
-                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600" class="w-full h-full object-cover opacity-40 group-hover:scale-110 transition duration-700">
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2">NEON-SAAS</h3>
-                    <div class="flex justify-between items-center">
-                        <span class="text-2xl font-bold text-accent">$2,999</span>
-                        <button onclick="addToCart('NEON-SAAS', 2999)" class="bg-white text-black px-6 py-3 rounded-full text-[10px] font-black uppercase">Add to Cart</button>
-                    </div>
-                </div>
-                <div class="glass-card p-5 rounded-[2.5rem] group">
-                    <div class="h-56 bg-gray-900 rounded-3xl mb-6 overflow-hidden relative">
-                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600" class="w-full h-full object-cover opacity-40 group-hover:scale-110 transition duration-700">
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2">AURA AGENCY</h3>
-                    <div class="flex justify-between items-center">
-                        <span class="text-2xl font-bold text-accent">$1,850</span>
-                        <button onclick="addToCart('AURA AGENCY', 1850)" class="bg-white text-black px-6 py-3 rounded-full text-[10px] font-black uppercase">Add to Cart</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+<div>
+<h1 class="text-7xl md:text-8xl font-bold mb-6">
+Buy<br><span class="text-cyan-400">Premium Websites</span>
+</h1>
+<p class="text-gray-400 max-w-2xl mx-auto">
+A high-end digital marketplace for production-ready websites, SaaS products, and scalable frontend assets.
+</p>
+</div>
 
-        <section id="contact" class="tab-content py-10">
-            <div class="max-w-4xl mx-auto glass-card p-16 rounded-[4rem] text-center border-accent/20">
-                <h2 class="text-5xl font-bold tracking-tighter mb-6">Strategic Acquisition</h2>
-                <p class="text-gray-400 mb-12 max-w-lg mx-auto">Click below to fill our official acquisition form and initiate the property transfer protocol.</p>
-                <a href="https://zyntriax.netlify.app/" target="_blank" class="btn-premium px-16 py-6 text-xs uppercase tracking-widest inline-block">
-                    Apply via Portal
-                </a>
-            </div>
-        </section>
+<div class="grid md:grid-cols-3 gap-10">
+<div class="glass p-8 rounded-3xl">
+<h3 class="font-bold text-xl mb-2">Instant Ownership</h3>
+<p class="text-gray-400 text-sm">Transfer-ready assets with full source code access.</p>
+</div>
+<div class="glass p-8 rounded-3xl">
+<h3 class="font-bold text-xl mb-2">Verified Vendors</h3>
+<p class="text-gray-400 text-sm">Multi-vendor ecosystem with quality validation.</p>
+</div>
+<div class="glass p-8 rounded-3xl">
+<h3 class="font-bold text-xl mb-2">Invoice & License</h3>
+<p class="text-gray-400 text-sm">Automatic invoice generation & ownership proof.</p>
+</div>
+</div>
 
-        <section id="engine" class="tab-content">
-            <div class="max-w-5xl mx-auto glass-card p-12 rounded-3xl">
-                <h2 class="text-4xl font-bold mb-8">Technical Authority</h2>
-                <div class="grid md:grid-cols-3 gap-8 text-center">
-                    <div><p class="text-accent text-3xl font-black">100/100</p><p class="text-[10px] uppercase text-gray-500">Speed Score</p></div>
-                    <div><p class="text-accent text-3xl font-black">24ms</p><p class="text-[10px] uppercase text-gray-500">Latency</p></div>
-                    <div><p class="text-accent text-3xl font-black">AI-READY</p><p class="text-[10px] uppercase text-gray-500">Endpoints</p></div>
-                </div>
-            </div>
-        </section>
+<button onclick="openTab('store')" class="btn px-20 py-6 text-xs uppercase">
+Explore Marketplace
+</button>
 
-        <section id="checkout" class="tab-content">
-            <div class="max-w-3xl mx-auto">
-                <h2 class="text-4xl font-bold mb-8">Asset Cart</h2>
-                <div id="cartItemsList" class="space-y-4 mb-10"></div>
-                <div class="glass-card p-10 rounded-3xl flex justify-between items-center">
-                    <h3 id="cartTotal" class="text-4xl font-bold text-accent">$0</h3>
-                    <button onclick="finalCheckout()" class="btn-premium px-12 py-5 uppercase text-[10px] tracking-widest">Purchase License</button>
-                </div>
-            </div>
-        </section>
+</section>
 
-        <section id="support" class="tab-content">
-            <div class="max-w-2xl mx-auto text-center">
-                <h2 class="text-4xl font-bold mb-8">Need Assistance?</h2>
-                <p class="text-gray-400 mb-10">Interact with our AI Agent on the bottom right of your screen for real-time support.</p>
-            </div>
-        </section>
+<!-- STORE -->
+<section id="store" class="tab space-y-16">
 
-    </main>
+<h2 class="text-5xl font-bold">Marketplace</h2>
 
-    <script src='https://cdn.jotfor.ms/agent/embedjs/019b7ad783c8752b8f5e2a23fd53242dccab/embed.js'></script>
+<div class="grid md:grid-cols-2 gap-10">
 
-    <script>
-        // --- AUTH & SESSION ---
-        function toggleAuth() { document.getElementById('loginModal').classList.toggle('show'); }
-        function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const user = email.split('@')[0].toUpperCase();
-            localStorage.setItem('zynt_session', user);
-            updateAuthUI(user);
-            toggleAuth();
-        }
-        function updateAuthUI(user) {
-            if(user) {
-                document.getElementById('loginBtn').classList.add('hidden');
-                document.getElementById('userProfile').classList.remove('hidden');
-                document.getElementById('userProfile').classList.add('flex');
-                document.getElementById('userName').innerText = `ID: ${user}`;
-            } else {
-                document.getElementById('loginBtn').classList.remove('hidden');
-                document.getElementById('userProfile').classList.add('hidden');
-            }
-        }
-        function logout() { localStorage.removeItem('zynt_session'); updateAuthUI(null); }
+<div class="glass p-8 rounded-3xl space-y-6">
+<h3 class="text-2xl font-bold">SaaS Landing Pro</h3>
+<p class="text-gray-400">Vendor: <b>NeonLabs</b></p>
+<ul class="text-sm text-gray-400 list-disc ml-5 space-y-1">
+<li>Tailwind + GSAP animations</li>
+<li>SEO optimized layout</li>
+<li>Production ready</li>
+</ul>
+<div class="flex justify-between items-center">
+<span class="text-cyan-400 text-2xl font-bold">$2999</span>
+<button onclick="addToCart('SaaS Landing Pro',2999,'NeonLabs')" class="btn px-8 py-3 text-xs">Add to Cart</button>
+</div>
+</div>
 
-        // --- CART ENGINE ---
-        let cart = [];
-        function addToCart(name, price) {
-            cart.push({name, price});
-            renderCart();
-            alert("Asset Linked to Session.");
-        }
-        function renderCart() {
-            document.getElementById('cartCount').innerText = cart.length;
-            const list = document.getElementById('cartItemsList');
-            const tot = document.getElementById('cartTotal');
-            if(cart.length === 0) { list.innerHTML = "<p class='text-gray-500'>Empty.</p>"; tot.innerText = "$0"; return; }
-            list.innerHTML = cart.map(item => `<div class="glass-card p-6 rounded-2xl flex justify-between"><span>${item.name}</span><span class="text-accent">$${item.price}</span></div>`).join('');
-            const sum = cart.reduce((s, i) => s + i.price, 0);
-            tot.innerText = `$${sum.toLocaleString()}`;
-        }
-        function finalCheckout() {
-            if(!localStorage.getItem('zynt_session')) return alert("Please login first.");
-            alert("Protocol Initiated. Check your secure node for invoice.");
-            cart = []; renderCart(); switchTab('home');
-        }
+<div class="glass p-8 rounded-3xl space-y-6">
+<h3 class="text-2xl font-bold">Agency Website</h3>
+<p class="text-gray-400">Vendor: <b>AuraStudio</b></p>
+<ul class="text-sm text-gray-400 list-disc ml-5 space-y-1">
+<li>Creative portfolio design</li>
+<li>CMS ready structure</li>
+<li>Client-ready delivery</li>
+</ul>
+<div class="flex justify-between items-center">
+<span class="text-cyan-400 text-2xl font-bold">$1850</span>
+<button onclick="addToCart('Agency Website',1850,'AuraStudio')" class="btn px-8 py-3 text-xs">Add to Cart</button>
+</div>
+</div>
 
-        // --- NAVIGATION ---
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+</div>
 
-        // --- INITIALIZATION ---
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', e => {
-            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-        });
+</section>
 
-        window.addEventListener('load', () => {
-            const session = localStorage.getItem('zynt_session');
-            if(session) updateAuthUI(session);
-            setTimeout(() => { document.getElementById('preloader').style.display='none'; document.body.classList.remove('overflow-hidden'); }, 1000);
-        });
-    </script>
+<!-- CART -->
+<section id="cart" class="tab space-y-10">
+
+<h2 class="text-5xl font-bold">Your Cart</h2>
+<div id="cartItems" class="space-y-4"></div>
+
+<div class="glass p-8 rounded-3xl flex justify-between items-center">
+<div>
+<p class="text-gray-400 text-sm">Secure license generation</p>
+<p id="total" class="text-cyan-400 text-2xl font-bold">$0</p>
+</div>
+<button onclick="checkout()" class="btn px-12 py-4 text-xs uppercase">Generate Invoice</button>
+</div>
+
+</section>
+
+<!-- ORDERS -->
+<section id="orders" class="tab space-y-10">
+
+<h2 class="text-5xl font-bold">Invoices</h2>
+<p class="text-gray-400">All your purchases with vendor & license details.</p>
+<div id="ordersList" class="space-y-6"></div>
+
+</section>
+
+<!-- SUPPORT -->
+<section id="support" class="tab space-y-12 text-center">
+
+<h2 class="text-5xl font-bold">Support Center</h2>
+<p class="text-gray-400 max-w-xl mx-auto">
+Need help with purchase, license transfer, or vendor coordination?  
+Our acquisition team is ready.
+</p>
+
+<div class="grid md:grid-cols-3 gap-8">
+<div class="glass p-6 rounded-2xl">Average Response: <b>2–4 Hours</b></div>
+<div class="glass p-6 rounded-2xl">License Support: <b>Included</b></div>
+<div class="glass p-6 rounded-2xl">Vendor Mediation: <b>Available</b></div>
+</div>
+
+<a href="https://zyntriax.netlify.app/" target="_blank" class="btn px-20 py-5 text-xs uppercase">
+Contact Us
+</a>
+
+</section>
+
+</main>
+
+<script>
+/* Cursor */
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{
+cursor.style.left=e.clientX+'px';
+cursor.style.top=e.clientY+'px';
+});
+
+/* Tabs */
+function openTab(id){
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+window.scrollTo(0,0);
+}
+
+/* Login */
+function toggleLogin(){loginModal.classList.toggle('hidden')}
+function login(e){
+e.preventDefault();
+const user=email.value.split('@')[0];
+localStorage.setItem('user',user);
+loginBtn.classList.add('hidden');
+userTag.innerText="ID: "+user;
+userTag.classList.remove('hidden');
+toggleLogin();
+}
+
+/* Cart + Invoice */
+let cart=[];
+let invoices=JSON.parse(localStorage.getItem('invoices'))||[];
+
+function addToCart(name,price,vendor){
+cart.push({name,price,vendor});
+cartCount.innerText=cart.length;
+renderCart();
+}
+
+function renderCart(){
+cartItems.innerHTML='';
+let sum=0;
+cart.forEach(i=>{
+sum+=i.price;
+cartItems.innerHTML+=`
+<div class="glass p-6 rounded-xl">
+<b>${i.name}</b> — ${i.vendor}
+<span class="float-right text-cyan-400">$${i.price}</span>
+</div>`;
+});
+total.innerText="$"+sum;
+}
+
+function checkout(){
+if(!localStorage.getItem('user')) return alert("Login required");
+const invoice={
+id:"INV-"+Date.now(),
+user:localStorage.getItem('user'),
+date:new Date().toLocaleString(),
+items:cart
+};
+invoices.push(invoice);
+localStorage.setItem('invoices',JSON.stringify(invoices));
+cart=[];
+cartCount.innerText=0;
+renderCart();
+renderInvoices();
+openTab('orders');
+}
+
+function renderInvoices(){
+ordersList.innerHTML='';
+invoices.forEach(inv=>{
+ordersList.innerHTML+=`
+<div class="glass p-6 rounded-xl">
+<b>${inv.id}</b><br>
+User: ${inv.user}<br>
+Date: ${inv.date}<br>
+Assets: ${inv.items.map(i=>`${i.name} (${i.vendor})`).join(', ')}
+</div>`;
+});
+}
+renderInvoices();
+</script>
+
+<script src="https://cdn.jotfor.ms/agent/embedjs/019b7ad783c8752b8f5e2a23fd53242dccab/embed.js"></script>
+
 </body>
 </html>
